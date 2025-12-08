@@ -1,0 +1,136 @@
+services:
+  # 主查詢界面
+  opensearch-sql:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: opensearch-sql-web
+    env_file:
+      - .env
+    ports:
+      - "5002:5002"
+    volumes:
+      # 掛載可編輯的配置和資料（開發模式）
+      # 這些文件的修改會立即生效
+      # 使用 ${DB_ROOT_DIRECTORY:-PosTest} 從 .env 讀取資料庫路徑
+      
+      # Few-shot 配置（可編輯）
+      - ./${DB_ROOT_DIRECTORY:-PosTest}/fewshot:/app/${DB_ROOT_DIRECTORY:-PosTest}/fewshot
+      
+      # ChromaDB 資料（持久化）
+      - ./${DB_ROOT_DIRECTORY:-PosTest}/.chromadb:/app/${DB_ROOT_DIRECTORY:-PosTest}/.chromadb
+      
+      # 資料庫描述文件（可編輯）
+      - ./${DB_ROOT_DIRECTORY:-PosTest}/dev/dev_databases/${DB_ROOT_DIRECTORY:-PosTest}/database_description:/app/${DB_ROOT_DIRECTORY:-PosTest}/dev/dev_databases/${DB_ROOT_DIRECTORY:-PosTest}/database_description
+      
+      # 資料集配置（可編輯）
+      - ./${DB_ROOT_DIRECTORY:-PosTest}/dev/dev.json:/app/${DB_ROOT_DIRECTORY:-PosTest}/dev/dev.json
+      - ./${DB_ROOT_DIRECTORY:-PosTest}/dev/tables.json:/app/${DB_ROOT_DIRECTORY:-PosTest}/dev/tables.json
+      - ./${DB_ROOT_DIRECTORY:-PosTest}/dev/db_schema.json:/app/${DB_ROOT_DIRECTORY:-PosTest}/db_schema.json
+      
+      # 資料庫文件（可選：如果需要持久化修改）
+      # 注意：如果不掛載，使用映像中的資料庫（只讀）
+      - ./${DB_ROOT_DIRECTORY:-PosTest}/dev/dev_databases/${DB_ROOT_DIRECTORY:-PosTest}/${DB_ROOT_DIRECTORY:-PosTest}.sqlite:/app/${DB_ROOT_DIRECTORY:-PosTest}/dev/dev_databases/${DB_ROOT_DIRECTORY:-PosTest}/${DB_ROOT_DIRECTORY:-PosTest}.sqlite
+      
+      # Embedding 文件（可重建）
+      - ./${DB_ROOT_DIRECTORY:-PosTest}/emb:/app/${DB_ROOT_DIRECTORY:-PosTest}/emb
+      
+      # 日誌和結果目錄（持久化）
+      - ./logs:/app/logs
+      - ./results:/app/results
+      
+    environment:
+      # Flask 配置
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+      
+      # 從 .env 文件讀取配置
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - DEFAULT_MODEL=${DEFAULT_MODEL:-gpt-4o-mini}
+      - DB_ROOT_DIRECTORY=${DB_ROOT_DIRECTORY:-PosTest}
+      - TEMPERATURE=${TEMPERATURE:-0.0}
+      - MAX_TOKENS=${MAX_TOKENS:-800}
+      
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+      
+    networks:
+      - opensearch-network
+      
+    labels:
+      - "com.opensearch-sql.description=OpenSearch-SQL Web Interface"
+      - "com.opensearch-sql.version=1.0"
+
+  # Few-shot 管理界面
+  fewshot-manager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: opensearch-sql-fewshot
+    env_file:
+      - .env
+    ports:
+      - "5004:5003"
+    volumes:
+      # 掛載 Few-shot 配置（可編輯）
+      # 使用 ${DB_ROOT_DIRECTORY:-PosTest} 從 .env 讀取資料庫路徑
+      - ./${DB_ROOT_DIRECTORY:-PosTest}/fewshot:/app/${DB_ROOT_DIRECTORY:-PosTest}/fewshot
+      
+      # ChromaDB 資料（持久化）
+      - ./${DB_ROOT_DIRECTORY:-PosTest}/.chromadb:/app/${DB_ROOT_DIRECTORY:-PosTest}/.chromadb
+      
+      # 掛載資料庫描述文件
+      - ./${DB_ROOT_DIRECTORY:-PosTest}/dev/dev_databases/${DB_ROOT_DIRECTORY:-PosTest}/database_description:/app/${DB_ROOT_DIRECTORY:-PosTest}/dev/dev_databases/${DB_ROOT_DIRECTORY:-PosTest}/database_description
+      
+      # 掛載資料集配置
+      - ./${DB_ROOT_DIRECTORY:-PosTest}/dev/dev.json:/app/${DB_ROOT_DIRECTORY:-PosTest}/dev/dev.json
+      - ./${DB_ROOT_DIRECTORY:-PosTest}/dev/tables.json:/app/${DB_ROOT_DIRECTORY:-PosTest}/dev/tables.json
+      
+      # 資料庫文件
+      - ./${DB_ROOT_DIRECTORY:-PosTest}/dev/dev_databases/${DB_ROOT_DIRECTORY:-PosTest}/${DB_ROOT_DIRECTORY:-PosTest}.sqlite:/app/${DB_ROOT_DIRECTORY:-PosTest}/dev/dev_databases/${DB_ROOT_DIRECTORY:-PosTest}/${DB_ROOT_DIRECTORY:-PosTest}.sqlite
+      
+      # Embedding 文件（可重建）
+      - ./${DB_ROOT_DIRECTORY:-PosTest}/emb:/app/${DB_ROOT_DIRECTORY:-PosTest}/emb
+      
+    environment:
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+      
+      # 從 .env 文件讀取配置
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - DEFAULT_MODEL=${DEFAULT_MODEL:-gpt-4o-mini}
+      - DB_ROOT_DIRECTORY=${DB_ROOT_DIRECTORY:-PosTest}
+      
+    command: python web/fewshot_advanced.py
+    
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+      
+    networks:
+      - opensearch-network
+      
+    labels:
+      - "com.opensearch-sql.description=OpenSearch-SQL Few-shot Manager"
+      - "com.opensearch-sql.version=1.0"
+
+networks:
+  opensearch-network:
+    driver: bridge

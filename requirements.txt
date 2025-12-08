@@ -1,0 +1,24 @@
+# Core dependencies
+sentence-transformers
+dashscope
+func_timeout
+torch
+pandas
+numpy
+chardet
+openai
+json_repair
+python-dotenv
+
+# Vector database for few-shot retrieval
+chromadb>=0.4.0
+
+
+# Web framework
+flask
+flask-cors
+
+# LangChain and LangGraph
+langchain-core
+langgraph
+langgraph-checkpoint

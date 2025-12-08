@@ -1,0 +1,116 @@
+services:
+  # 測試資料庫查詢界面
+  opensearch-sql-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: opensearch-sql-test
+    ports:
+      - "5012:5002"  # 使用不同的 port 避免衝突
+    volumes:
+      # Azure OpenAI 配置
+      - ./azure_openai_config.py:/app/azure_openai_config.py:ro
+      
+      # testDB 的 Few-shot 配置
+      - ./testDB/fewshot:/app/testDB/fewshot
+      
+      # testDB 的資料庫描述文件
+      - ./testDB/dev/dev_databases/testDB/database_description:/app/testDB/dev/dev_databases/testDB/database_description
+      
+      # testDB 的資料集配置
+      - ./testDB/dev/dev.json:/app/testDB/dev/dev.json
+      - ./testDB/dev/tables.json:/app/testDB/dev/tables.json
+      - ./testDB/db_schema.json:/app/testDB/db_schema.json
+      
+      # testDB 的資料庫文件
+      - ./testDB/dev/dev_databases/testDB/testDB.sqlite:/app/testDB/dev/dev_databases/testDB/testDB.sqlite
+      
+      # testDB 的 Embedding 文件
+      - ./testDB/emb:/app/testDB/emb
+      
+      # 日誌和結果目錄
+      - ./logs:/app/logs
+      - ./results:/app/results
+      
+    environment:
+      # Flask 配置
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+      
+      # 指定使用 testDB
+      - DB_ROOT_PATH=testDB
+      
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+      
+    networks:
+      - opensearch-test-network
+      
+    labels:
+      - "com.opensearch-sql.description=OpenSearch-SQL Test Interface"
+      - "com.opensearch-sql.version=1.0"
+      - "com.opensearch-sql.database=testDB"
+
+  # testDB Few-shot 管理界面
+  fewshot-manager-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: opensearch-sql-fewshot-test
+    ports:
+      - "5014:5003"  # 使用不同的 port
+    volumes:
+      # 啟動腳本
+      - ./start_fewshot_testdb.py:/app/start_fewshot_testdb.py:ro
+      
+      # testDB 的 Few-shot 配置
+      - ./testDB/fewshot:/app/testDB/fewshot
+      
+      # testDB 的資料庫描述文件
+      - ./testDB/dev/dev_databases/testDB/database_description:/app/testDB/dev/dev_databases/testDB/database_description
+      
+      # testDB 的資料集配置
+      - ./testDB/dev/dev.json:/app/testDB/dev/dev.json
+      - ./testDB/dev/tables.json:/app/testDB/dev/tables.json
+      
+      # testDB 的資料庫文件
+      - ./testDB/dev/dev_databases/testDB/testDB.sqlite:/app/testDB/dev/dev_databases/testDB/testDB.sqlite
+      
+      # testDB 的 Embedding 文件
+      - ./testDB/emb:/app/testDB/emb
+      
+    environment:
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+      - DB_ROOT_PATH=testDB
+      
+    command: python start_fewshot_testdb.py
+    
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+      
+    networks:
+      - opensearch-test-network
+      
+    labels:
+      - "com.opensearch-sql.description=OpenSearch-SQL Test Few-shot Manager"
+      - "com.opensearch-sql.version=1.0"
+      - "com.opensearch-sql.database=testDB"
+
+networks:
+  opensearch-test-network:
+    driver: bridge

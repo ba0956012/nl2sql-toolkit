@@ -1,0 +1,67 @@
+**/__pycache__/
+
+# 環境變數和敏感配置
+.env
+.env.local
+.env.*.local
+azure_openai_config.py
+
+# 日誌
+logs/
+*.log
+
+# 資料庫檔案和資料目錄
+*.sqlite
+*.db
+TestDB/
+PosTest/
+results/
+PosTest/dev/dev_databases/
+PosTest/emb/
+tests/
+*/dev/dev_databases/
+*/emb/
+
+# 備份檔案
+*.backup
+*.bak
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# 測試
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 暫存檔案
+*.tmp
+.DS_Store
+Thumbs.db
+
+# ChromaDB 資料
+.chromadb/
+*/.chromadb/
+
+# 模型檔案（通常很大）
+model/
+*.bin
+*.pt
+*.pth
+*.onnx
+*.h5
+

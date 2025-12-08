@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Logs (空目錄會被創建)
+logs/*.log
+
+# Results (空目錄會被創建)
+results/*/
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+
+# Docker files (不需要在映像中)
+Dockerfile
+docker-compose.yml
+.dockerignore
+deploy.sh
+
+# Test files (可選，如果不需要在容器中測試)
+test_*.py
+*_test.py
+check_setup.sh
+quick_test.sh
+
+# Conda
+.conda/
+conda-meta/
+
+# Node modules
+node_modules/
+
+# Environment files
+.env
+.env.local
+
+# 不排除以下重要文件和目錄：
+# - PosTest/ (包含資料庫)
+# - src/ (源代碼)
+# - azure_openai_config.py (配置)
+# - *.md (文檔，可選包含)
