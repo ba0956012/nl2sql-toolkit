@@ -1,6 +1,6 @@
 # NL2SQL Toolkit
 
-[中文說明](README.zh-TW.md)
+[中文說明](readme.zh-TW.md)
 
 A Text-to-SQL toolkit built on top of **[OpenSearch-SQL](https://github.com/OpenSearch-AI/OpenSearch-SQL)**, designed to convert natural language questions into SQL queries. The system includes a web-based query console, few-shot example management, and automated setup tools.
 
