@@ -1,121 +1,124 @@
 # NL2SQL Toolkit
 
-基於 [OpenSearch-SQL](https://github.com/OpenSearch-AI/OpenSearch-SQL) 的 Text-to-SQL 工具，用於將自然語言問題轉換為 SQL 查詢，並提供 Web 查詢介面與 Few-shot 管理功能。
+[中文說明](README.zh-TW.md)
+
+A Text-to-SQL toolkit built on top of **[OpenSearch-SQL](https://github.com/OpenSearch-AI/OpenSearch-SQL)**, designed to convert natural language questions into SQL queries. The system includes a web-based query console, few-shot example management, and automated setup tools.
 
 ---
 
-## 快速開始
+## 🚀 Quick Start
 
 ```bash
-# 1. 設置配置
+# 1. Create configuration
 cp .env.example .env && nano .env
 
-# 2. 建立資料庫 + Few-shot
+# 2. Setup database + few-shot examples
 bash scripts/setup/setup_from_sqlite_with_fewshot.sh MyDB /path/to/your.sqlite
 
-# 3. 啟動服務
+# 3. Run services
 docker-compose up
 ```
 
-介面：
+Web Interfaces:
 
-- 查詢界面：http://localhost:5002  
-- Few-shot 管理：http://localhost:5003  
+- Query UI: http://localhost:5002  
+- Few-shot Management: http://localhost:5003  
 
 ---
 
-## Text-to-SQL 簡介
+## 🧠 Text-to-SQL Overview
 
-Text-to-SQL 用於將自然語言問題轉換為 SQL 查詢。
+Text-to-SQL automatically converts natural language into SQL queries.
 
-範例：
+Example:
 
 ```
-問題：哪個商品銷量最高？
-系統：SELECT product_name, SUM(amount) ...
+Question: Which product has the highest sales?
+System: SELECT product_name, SUM(amount) ...
 ```
 
 ---
 
-# 功能介紹
+# ✨ Features
 
-## 核心功能  
-- 將自然語言查詢自動生成 SQL  
-- Web 查詢介面  
-- Few-shot 範例管理  
-- 自訂 Few-shot 增加查詢準確度  
+## Core Features
+- Convert natural language queries into SQL  
+- Web-based query interface  
+- Few-shot example management  
+- Support custom few-shot examples to improve accuracy  
 
-## 擴充功能
-- 自動化建置流程（包含 Few-shot 自動生成）
-- 動態選擇fewshot範例
-- `.env` 統一環境設定
-- Docker 一鍵部署
+## Extended Features
+- Fully automated build pipeline (including auto few-shot generation)  
+- Dynamic few-shot retrieval via ChromaDB  
+- Unified configuration via `.env`  
+- One-command Docker deployment  
 
 ---
 
-# 主要新增
+# 🆕 Major Enhancements
 
-## 1. 自動建置流程
+## 1. Automated Build Pipeline
 
-執行以下指令即可完成所有設定：
+Run a single command:
 
 ```bash
 sh setup_from_sqlite_with_fewshot.sh MyDB /path/to/db.sqlite
 ```
 
-流程包含：
+Included steps:
 
-- 資料庫結構建立  
-- 生成資料表描述  
-- 資料前處理  
-- 自動產生 Few-shot  
-- Embedding 建立  
-- 完整檢查流程  
+- Database schema extraction  
+- Table description generation  
+- Data preprocessing  
+- Automatic few-shot creation  
+- Embedding building  
+- Full system validation  
 
 ---
 
-## 2. 動態 Few-shot 選擇（ChromaDB）
+## 2. Dynamic Few-shot Selection (ChromaDB)
 
-系統啟動時會將 Few-shot 內容建立向量索引，查詢時會自動選擇最相似的範例。
+On startup, the system embeds all few-shot examples and constructs a vector index.  
+During execution, it retrieves the most relevant examples automatically.
 
-流程如下：
+Workflow:
 
 ```
-使用者問題 → ChromaDB 檢索 → 選取 Few-shot → 生成 SQL
+User question → ChromaDB search → Select few-shot → Generate SQL
 ```
 
-特色：
+Benefits:
 
-- Few-shot 修改後自動更新索引  
-- Embedding 永久儲存  
-- 不須重新計算  
-- 提升 SQL 生成可靠度  
-
----
-
-## 3. `.env` 統一配置
-
-可設定：
-
-- Azure OpenAI / OpenAI API Key  
-- Web 服務 Port  
-- DB Root Path  
-- 模型設定  
-- Few-shot 資料來源  
-- Embedding 選項  
+- Few-shot updates are automatically re-indexed  
+- Persistent embedding storage  
+- No need to re-calculate embeddings manually  
+- More reliable SQL generation  
 
 ---
 
-# 使用方式
+## 3. Unified `.env` Configuration
 
-## 1. 設定 `.env`
+You can configure:
+
+- Azure OpenAI / OpenAI API keys  
+- Web server ports  
+- Database root directory  
+- Model parameters  
+- Few-shot data directory  
+- Embedding settings  
+
+---
+
+# 🛠 Usage
+
+## 1. Configure `.env`
 
 ```bash
 cp .env.example .env
 nano .env
 ```
 
-最小設定：
+Minimal configuration:
 
 ```env
 AZURE_OPENAI_ENDPOINT=...
@@ -125,7 +128,7 @@ DB_ROOT_DIRECTORY=MyDB
 
 ---
 
-## 2. 建立資料庫與 Few-shot
+## 2. Build database and few-shot examples
 
 ```bash
 bash scripts/setup/setup_from_sqlite_with_fewshot.sh MyDB /path/to/your.sqlite
@@ -133,14 +136,15 @@ bash scripts/setup/setup_from_sqlite_with_fewshot.sh MyDB /path/to/your.sqlite
 
 ---
 
-## 3. 啟動 Web 介面
+## 3. Start the web services
 
 ```bash
 docker-compose up
 ```
 
+---
 
-# 專案結構
+# 📁 Project Structure
 
 ```
 OpenSearch-SQL/
@@ -168,4 +172,3 @@ OpenSearch-SQL/
 └── .env
 ```
 
----
